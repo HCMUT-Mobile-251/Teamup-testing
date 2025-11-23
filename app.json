@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "BKMindCare",
+    "slug": "bkmindcare",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#E3F2FD"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bkmindcare.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E3F2FD"
+      },
+      "package": "com.bkmindcare.app"
+    },
+    "web": {
+    },
+    "plugins": [],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}
+
