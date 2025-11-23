@@ -58,7 +58,7 @@ const AllDoctorsScreen = () => {
             <TouchableOpacity
               key={doctor.id}
               style={styles.doctorCard}
-              onPress={() => navigation.navigate('Appointment' as never)}
+              onPress={() => navigation.navigate('DoctorDetail' as never, { doctorId: doctor.id } as never)}
             >
               <View style={styles.doctorAvatar}>
                 <Ionicons name="person" size={40} color={Colors.primary} />
@@ -73,12 +73,15 @@ const AllDoctorsScreen = () => {
                 </View>
                 <Text style={styles.doctorSpecialty}>{doctor.specialization}</Text>
                 <View style={styles.doctorActions}>
-                  <TouchableOpacity style={styles.viewButton}>
+                  <TouchableOpacity
+                    style={styles.viewButton}
+                    onPress={() => navigation.navigate('DoctorDetail' as never, { doctorId: doctor.id } as never)}
+                  >
                     <Text style={styles.viewButtonText}>View Profile</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.bookButton}
-                    onPress={() => navigation.navigate('Appointment' as never)}
+                    onPress={() => navigation.navigate('DoctorDetail' as never, { doctorId: doctor.id } as never)}
                   >
                     <Text style={styles.bookButtonText}>Book</Text>
                   </TouchableOpacity>

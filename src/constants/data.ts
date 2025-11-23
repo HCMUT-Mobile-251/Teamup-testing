@@ -17,9 +17,9 @@ export const mockDoctors: Doctor[] = [
   },
   {
     id: '3',
-    name: 'Dr. Helena Fos',
+    name: 'Dr. Helena Fox',
     specialization: 'Radiologist',
-    rating: 4.5,
+    rating: 4.8,
     avatar: 'https://i.pravatar.cc/150?img=3',
   },
   {

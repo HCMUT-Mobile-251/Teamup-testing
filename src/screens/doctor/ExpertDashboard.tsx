@@ -53,7 +53,13 @@ const ExpertDashboard = () => {
 
   const handlePatientPress = (patientId: string) => {
     if (patientId === '3') {
-      navigation.navigate('Chat' as never);
+      navigation.navigate('DoctorChat' as never, {
+        chatId: 'anonymous-chat-1',
+        doctorId: '1',
+        doctorName: 'Hoang Le Hai Thanh',
+        doctorAvatar: undefined,
+        isAnonymous: true,
+      } as any);
     } else {
       navigation.navigate('DetailAppointment' as never, { patientId } as never);
     }

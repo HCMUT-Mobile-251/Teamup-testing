@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -8,47 +8,89 @@ import {
   Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 import { mockDoctors, mockAppointments } from '../../constants/data';
-import { MoodSelector } from '../../components/MoodSelector';
-import { MoodType } from '../../types';
+import BottomNavigationBar from '../../components/BottomNavigationBar';
 
 const UserDashboard = () => {
   const navigation = useNavigation();
-  const [selectedMood, setSelectedMood] = useState<MoodType | undefined>();
-
-  const handleMoodSelect = (mood: MoodType) => {
-    setSelectedMood(mood);
-    navigation.navigate('MoodCheckIn' as never);
-  };
+  const insets = useSafeAreaInsets();
 
   const upcomingAppointment = mockAppointments[0];
 
+  const navItems = [
+    { name: 'Home', icon: 'home-outline', activeIcon: 'home', route: 'UserDashboard' },
+    { name: 'Chat', icon: 'chatbubbles-outline', activeIcon: 'chatbubbles', route: 'ChatList' },
+    { name: 'Calendar', icon: 'calendar-outline', activeIcon: 'calendar', route: 'Calendar' },
+    { name: 'Profile', icon: 'person-outline', activeIcon: 'person', route: 'Profile' },
+  ];
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity>
-            <Ionicons name="menu" size={28} color={Colors.text} />
-          </TouchableOpacity>
-          <View style={styles.profileContainer}>
-            <View style={styles.profileIcon}>
-              <Ionicons name="person" size={24} color={Colors.primary} />
+          <View style={styles.headerContent}>
+            <View style={styles.logoContainer}>
+              <Image
+                source={require('../../../assets/logo.png')}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+            </View>
+            <View style={styles.welcomeSection}>
+              <Text style={styles.welcomeText}>Welcome back, Candy</Text>
+            </View>
+            <View style={styles.headerRight}>
+              <TouchableOpacity onPress={() => navigation.navigate('StudentNotification' as never)}>
+                <Ionicons name="notifications" size={28} color={Colors.text} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Profile' as never)}
+                style={styles.profileIcon}
+              >
+                <Ionicons name="person" size={24} color={Colors.primary} />
+              </TouchableOpacity>
             </View>
           </View>
         </View>
 
-        {/* Welcome Section */}
-        <View style={styles.welcomeSection}>
-          <Text style={styles.welcomeText}>Welcome back, Candy</Text>
+        {/* Question Section */}
+        <View style={styles.questionSection}>
           <Text style={styles.questionText}>How's your mental state at the moment?</Text>
         </View>
 
-        {/* Mood Tracker */}
+        {/* Mood Check-in Button */}
         <View style={styles.moodSection}>
-          <MoodSelector selectedMood={selectedMood} onSelectMood={handleMoodSelect} />
+          <TouchableOpacity
+            style={styles.moodCheckInButton}
+            onPress={() => navigation.navigate('MoodCheckIn' as never)}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="heart" size={24} color={Colors.primary} />
+            <Text style={styles.moodCheckInText}>Mood Check-in</Text>
+            <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Anonymous Chat Button */}
+        <View style={styles.moodSection}>
+          <TouchableOpacity
+            style={styles.anonymousChatButton}
+            onPress={() => (navigation as any).navigate('ChatList')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.anonymousChatIcon}>
+              <Ionicons name="lock-closed" size={24} color={Colors.primary} />
+            </View>
+            <View style={styles.anonymousChatInfo}>
+              <Text style={styles.anonymousChatTitle}>Chat ẩn danh</Text>
+              <Text style={styles.anonymousChatSubtitle}>Trò chuyện với chuyên gia một cách ẩn danh</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
+          </TouchableOpacity>
         </View>
 
         {/* Upcoming Appointments */}
@@ -57,22 +99,25 @@ const UserDashboard = () => {
           {upcomingAppointment && (
             <TouchableOpacity
               style={styles.appointmentCard}
-              onPress={() => navigation.navigate('Appointment' as never)}
+              onPress={() => (navigation as any).navigate('AppointmentDetail', { appointmentId: upcomingAppointment.id })}
             >
               <View style={styles.appointmentContent}>
                 <View style={styles.appointmentLeft}>
                   <Text style={styles.appointmentDoctor}>{upcomingAppointment.doctorName}</Text>
-                  <Text style={styles.appointmentDate}>{upcomingAppointment.date}</Text>
-                  <Text style={styles.appointmentDetail}>
-                    {upcomingAppointment.type === 'video-call' ? '15 min video chat' : '15 min'} • {upcomingAppointment.location}
-                  </Text>
+                  <Text style={styles.appointmentDate}>19/11/2025</Text>
+                  <Text style={styles.appointmentDetail}>Session detail chat</Text>
+                  <Text style={styles.appointmentDuration}>Duration: 60mins</Text>
                   <View style={styles.appointmentTime}>
                     <Text style={styles.appointmentTimeText}>{upcomingAppointment.time}</Text>
                     <View style={styles.greenDot} />
                   </View>
                 </View>
                 <View style={styles.appointmentIcon}>
-                  <Ionicons name="people" size={40} color={Colors.primary} />
+                  <Image 
+                    source={require('../../../assets/carddetails(1).png')} 
+                    style={styles.appointmentImage}
+                    resizeMode="contain"
+                  />
                 </View>
               </View>
             </TouchableOpacity>
@@ -88,26 +133,38 @@ const UserDashboard = () => {
             </TouchableOpacity>
           </View>
           <View style={styles.doctorsGrid}>
-            {mockDoctors.slice(0, 4).map((doctor) => (
-              <TouchableOpacity
-                key={doctor.id}
-                style={styles.doctorCard}
-                onPress={() => navigation.navigate('Appointment' as never)}
-              >
-                <View style={styles.doctorAvatar}>
-                  <Ionicons name="person" size={32} color={Colors.primary} />
-                </View>
-                <View style={styles.ratingContainer}>
-                  <Ionicons name="star" size={12} color={Colors.warning} />
-                  <Text style={styles.rating}>{doctor.rating}</Text>
-                </View>
-                <Text style={styles.doctorName}>{doctor.name}</Text>
-                <Text style={styles.doctorSpecialty}>{doctor.specialization}</Text>
-                <TouchableOpacity style={styles.doctorButton}>
-                  <Ionicons name="chevron-up" size={16} color={Colors.teal} />
+            {mockDoctors.slice(0, 4).map((doctor, index) => {
+              // Map doctors to card images
+              const cardImages = [
+                require('../../../assets/carddetails(1).png'),
+                require('../../../assets/carddetails(3).png'),
+                require('../../../assets/carddetails(4).png'),
+                require('../../../assets/carddetails(2).png'), // Fallback for 4th doctor
+              ];
+              
+              return (
+                <TouchableOpacity
+                  key={doctor.id}
+                  style={styles.doctorCard}
+                  onPress={() => (navigation as any).navigate('DoctorDetail', { doctorId: doctor.id })}
+                >
+                  <Image 
+                    source={cardImages[index]} 
+                    style={styles.doctorCardImage}
+                    resizeMode="contain"
+                  />
+                  <View style={styles.ratingContainer}>
+                    <Ionicons name="star" size={12} color={Colors.warning} />
+                    <Text style={styles.rating}>{doctor.rating}</Text>
+                  </View>
+                  <Text style={styles.doctorName}>{doctor.name}</Text>
+                  <Text style={styles.doctorSpecialty}>{doctor.specialization}</Text>
+                  <TouchableOpacity style={styles.doctorButton}>
+                    <Ionicons name="chevron-up" size={16} color={Colors.teal} />
+                  </TouchableOpacity>
                 </TouchableOpacity>
-              </TouchableOpacity>
-            ))}
+              );
+            })}
           </View>
         </View>
 
@@ -133,29 +190,7 @@ const UserDashboard = () => {
       </ScrollView>
 
       {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="home" size={24} color={Colors.teal} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="calendar" size={24} color={Colors.textSecondary} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate('Chat' as never)}
-        >
-          <Ionicons name="people" size={24} color={Colors.textSecondary} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="ellipse" size={24} color={Colors.textSecondary} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate('Profile' as never)}
-        >
-          <Ionicons name="person" size={24} color={Colors.textSecondary} />
-        </TouchableOpacity>
-      </View>
+      <BottomNavigationBar items={navItems} />
     </View>
   );
 };
@@ -169,15 +204,26 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
+    padding: 16,
+    paddingTop: 10,
+    paddingBottom: 8,
+  },
+  headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    paddingTop: 50,
   },
-  profileContainer: {
+  logoContainer: {
+    marginRight: 12,
+  },
+  logo: {
+    width: 56,
+    height: 56,
+  },
+  headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
   },
   profileIcon: {
     width: 40,
@@ -188,14 +234,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   welcomeSection: {
-    paddingHorizontal: 16,
-    marginBottom: 24,
+    flex: 1,
   },
   welcomeText: {
     fontSize: 24,
     fontWeight: 'bold',
     color: Colors.text,
-    marginBottom: 8,
+  },
+  questionSection: {
+    paddingHorizontal: 16,
+    marginBottom: 24,
   },
   questionText: {
     fontSize: 16,
@@ -204,6 +252,53 @@ const styles = StyleSheet.create({
   moodSection: {
     paddingHorizontal: 16,
     marginBottom: 24,
+  },
+  moodCheckInButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primaryLight,
+    padding: 16,
+    borderRadius: 12,
+    justifyContent: 'space-between',
+  },
+  moodCheckInText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    flex: 1,
+    marginLeft: 12,
+  },
+  anonymousChatButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primaryLight,
+    padding: 16,
+    borderRadius: 12,
+    justifyContent: 'space-between',
+  },
+  anonymousChatIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: Colors.primary,
+  },
+  anonymousChatInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  anonymousChatTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 4,
+  },
+  anonymousChatSubtitle: {
+    fontSize: 14,
+    color: Colors.textSecondary,
   },
   section: {
     paddingHorizontal: 16,
@@ -254,6 +349,11 @@ const styles = StyleSheet.create({
   appointmentDetail: {
     fontSize: 14,
     color: Colors.textSecondary,
+    marginBottom: 4,
+  },
+  appointmentDuration: {
+    fontSize: 14,
+    color: Colors.textSecondary,
     marginBottom: 8,
   },
   appointmentTime: {
@@ -276,6 +376,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  appointmentImage: {
+    width: 80,
+    height: 80,
+  },
   doctorsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -290,13 +394,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'relative',
   },
-  doctorAvatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
+  doctorCardImage: {
+    width: '100%',
+    height: 120,
     marginBottom: 8,
   },
   ratingContainer: {
@@ -345,19 +445,6 @@ const styles = StyleSheet.create({
   serviceText: {
     fontSize: 16,
     color: Colors.text,
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingBottom: 24,
-    backgroundColor: Colors.lightGreen,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  navItem: {
-    padding: 8,
   },
 });
 

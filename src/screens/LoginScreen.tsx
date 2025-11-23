@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Colors } from '../constants/colors';
 import { CustomButton } from '../components/CustomButton';
@@ -22,11 +22,12 @@ const LoginScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.illustration}>
-          <View style={styles.circle} />
-          <View style={styles.circle} />
-          <View style={styles.line} />
-        </View>
+        <Image 
+          source={require('../../assets/logo.png')} 
+          style={styles.logo}
+          resizeMode="contain"
+        />
+        <Text style={styles.title}>BKMindCare</Text>
       </View>
 
       <View style={styles.content}>
@@ -39,8 +40,11 @@ const LoginScreen = () => {
         >
           <View style={styles.accountButtonContent}>
             <View style={styles.accountIcon}>
-              <Ionicons name="person" size={24} color={Colors.primary} />
-              <Ionicons name="settings" size={16} color={Colors.primary} style={styles.settingsIcon} />
+              <Image 
+                source={require('../../assets/bk.png')} 
+                style={styles.bkIcon}
+                resizeMode="contain"
+              />
             </View>
             <Text style={styles.accountButtonText}>HCMUT account</Text>
           </View>
@@ -51,11 +55,12 @@ const LoginScreen = () => {
           onPress={handleAdminLogin}
           activeOpacity={0.7}
         >
-          <Text style={styles.adminButtonText}>Admin</Text>
+          <Text style={styles.adminButtonText}>Psychologist</Text>
         </TouchableOpacity>
 
         <Text style={styles.helpText}>
-          Find help on common issues or need to create a new account? Log in here you need help?
+          Nếu bạn cần hỗ trợ hoặc có câu hỏi, vui lòng{' '}
+          <Text style={styles.helpLink}>liên hệ với chúng tôi để được hỗ trợ</Text>
         </Text>
       </View>
     </View>
@@ -68,34 +73,16 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
-    height: 200,
+    height: 250,
     backgroundColor: Colors.primaryLight,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
     overflow: 'hidden',
   },
-  illustration: {
-    width: '100%',
-    height: '100%',
-    position: 'relative',
-  },
-  circle: {
-    position: 'absolute',
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: Colors.blueLight,
-    opacity: 0.5,
-  },
-  line: {
-    position: 'absolute',
-    width: 2,
+  logo: {
+    width: 150,
     height: 150,
-    backgroundColor: Colors.primary,
-    opacity: 0.3,
-    left: '50%',
-    top: '25%',
   },
   content: {
     flex: 1,
@@ -110,10 +97,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   accountButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.background,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Colors.border,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -128,21 +117,20 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
     position: 'relative',
   },
-  settingsIcon: {
-    position: 'absolute',
-    bottom: -2,
-    right: -2,
+  bkIcon: {
+    width: 28,
+    height: 28,
   },
   accountButtonText: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.background,
+    color: Colors.text,
   },
   adminButton: {
     backgroundColor: Colors.primary,
@@ -161,6 +149,10 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 18,
+  },
+  helpLink: {
+    color: Colors.primary,
+    fontWeight: '600',
   },
 });
 

@@ -1,6 +1,6 @@
 export type UserRole = 'student' | 'doctor' | 'admin';
 
-export type MoodType = 'happy' | 'calm' | 'relax' | 'focus';
+export type MoodType = 'happy' | 'calm' | 'relax' | 'focus' | 'sad' | 'nervous' | 'awkward' | 'shy' | 'wonderful';
 
 export type AppointmentType = 'in-person' | 'video-call';
 

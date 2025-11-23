@@ -6,32 +6,35 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { GiftedChat, IMessage, User } from 'react-native-gifted-chat';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
-import BottomNavigationBar from '../../components/BottomNavigationBar';
-// Using mock Firebase for UI testing
 import { db } from '../../config/firebase';
+import { mockDoctors } from '../../constants/data';
 
-const ChatScreen = () => {
+const DoctorChatScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const [messages, setMessages] = useState<IMessage[]>([]);
   
   const routeParams = route.params as any;
   const chatId = routeParams?.chatId || 'anonymous-chat-1';
-  const doctorId = routeParams?.doctorId;
-  const isAnonymous = routeParams?.isAnonymous !== undefined ? routeParams.isAnonymous : !doctorId;
-  const doctorName = routeParams?.doctorName;
-  const doctorAvatar = routeParams?.doctorAvatar;
+  const isAnonymous = routeParams?.isAnonymous !== undefined ? routeParams.isAnonymous : true;
 
-  // In anonymous chat, student can see doctor info, but doctor can't see student info
+  // Doctor info - always visible and public
+  const doctor = mockDoctors[0]; // Default doctor, can be passed from params
+  const doctorId = routeParams?.doctorId || doctor.id;
+  const doctorName = routeParams?.doctorName || doctor.name;
+  const doctorAvatar = routeParams?.doctorAvatar || doctor.avatar;
+
+  // Doctor user - always shows doctor info
   const currentUser: User = {
-    _id: isAnonymous ? 'anonymous' : 'user1',
-    name: isAnonymous ? 'Anonymous' : 'Candy',
-    avatar: isAnonymous ? undefined : 'https://i.pravatar.cc/150?img=5',
+    _id: `doctor-${doctorId}`,
+    name: doctorName,
+    avatar: doctorAvatar,
   };
 
   useEffect(() => {
@@ -107,7 +110,7 @@ const ChatScreen = () => {
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <View style={styles.userInfo}>
-            {/* Always show doctor info to student, even in anonymous chat */}
+            {/* Doctor's own info - always visible */}
             {doctorAvatar ? (
               <Image
                 source={{ uri: doctorAvatar }}
@@ -119,16 +122,14 @@ const ChatScreen = () => {
               </View>
             )}
             <View>
-              <Text style={styles.userName}>
-                {doctorName || 'Dr. Support'}
-              </Text>
+              <Text style={styles.userName}>{doctorName}</Text>
               <View style={styles.statusContainer}>
                 <View style={styles.statusDot} />
                 <Text style={styles.statusText}>Online</Text>
                 {isAnonymous && (
                   <View style={styles.anonymousBadgeHeader}>
                     <Ionicons name="lock-closed" size={12} color={Colors.primary} />
-                    <Text style={styles.anonymousBadgeText}>Ẩn danh</Text>
+                    <Text style={styles.anonymousBadgeText}>Chat ẩn danh</Text>
                   </View>
                 )}
               </View>
@@ -137,16 +138,20 @@ const ChatScreen = () => {
         </View>
         <View style={styles.headerRight}>
           <TouchableOpacity style={styles.headerButton}>
-            <Ionicons name="call" size={24} color={Colors.text} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton}>
-            <Ionicons name="videocam" size={24} color={Colors.text} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton}>
             <Ionicons name="ellipsis-vertical" size={24} color={Colors.text} />
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Anonymous Info Badge */}
+      {isAnonymous && (
+        <View style={styles.anonymousInfoBadge}>
+          <Ionicons name="information-circle" size={16} color={Colors.primary} />
+          <Text style={styles.anonymousInfoText}>
+            Bạn đang chat với sinh viên ẩn danh. Thông tin của bạn được hiển thị công khai.
+          </Text>
+        </View>
+      )}
 
       {/* Chat Messages */}
       <KeyboardAvoidingView
@@ -196,39 +201,35 @@ const ChatScreen = () => {
             );
           }}
           renderAvatar={(props) => {
+            // Doctor's own messages - show doctor avatar
             if (props.currentMessage?.user._id === currentUser._id) {
-              return null;
+              if (doctorAvatar) {
+                return (
+                  <Image
+                    source={{ uri: doctorAvatar }}
+                    style={styles.messageAvatar}
+                  />
+                );
+              }
+              return (
+                <View style={styles.avatar}>
+                  <Ionicons name="person" size={16} color={Colors.primary} />
+                </View>
+              );
             }
+            // Patient messages - show anonymous icon
             return (
-              <View style={styles.avatar}>
-                <Ionicons name="person" size={16} color={Colors.primary} />
+              <View style={[styles.avatar, styles.anonymousAvatar]}>
+                <Ionicons name="lock-closed" size={16} color={Colors.textSecondary} />
               </View>
             );
           }}
-          showUserAvatar={false}
+          showUserAvatar={true}
           alwaysShowSend
           scrollToBottom
           infiniteScroll
         />
       </KeyboardAvoidingView>
-
-      {/* Anonymous Badge */}
-      {isAnonymous && (
-        <View style={styles.anonymousBadge}>
-          <Ionicons name="lock-closed" size={14} color={Colors.primary} />
-          <Text style={styles.anonymousText}>Chat ẩn danh - Thông tin của bạn được bảo mật</Text>
-        </View>
-      )}
-
-      {/* Bottom Navigation */}
-      <BottomNavigationBar
-        items={[
-          { name: 'Home', icon: 'home-outline', activeIcon: 'home', route: 'UserDashboard' },
-          { name: 'Chat', icon: 'chatbubbles-outline', activeIcon: 'chatbubbles', route: 'ChatList' },
-          { name: 'Calendar', icon: 'calendar-outline', activeIcon: 'calendar', route: 'Calendar' },
-          { name: 'Profile', icon: 'person-outline', activeIcon: 'person', route: 'Profile' },
-        ]}
-      />
     </View>
   );
 };
@@ -315,6 +316,21 @@ const styles = StyleSheet.create({
     padding: 8,
     marginLeft: 8,
   },
+  anonymousInfoBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primaryLight,
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  anonymousInfoText: {
+    fontSize: 12,
+    color: Colors.text,
+    marginLeft: 8,
+    flex: 1,
+    lineHeight: 16,
+  },
   chatContainer: {
     flex: 1,
     backgroundColor: Colors.purpleLight,
@@ -353,32 +369,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 8,
   },
-  messageAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    marginRight: 8,
+  anonymousAvatar: {
+    backgroundColor: Colors.backgroundLight,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   messageAvatar: {
     width: 32,
     height: 32,
     borderRadius: 16,
     marginRight: 8,
-  },
-  anonymousBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.primaryLight,
-    padding: 8,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-  },
-  anonymousText: {
-    fontSize: 12,
-    color: Colors.primary,
-    marginLeft: 4,
-    fontWeight: '500',
   },
   inputToolbar: {
     flexDirection: 'row',
@@ -393,13 +393,9 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flex: 1,
-    backgroundColor: Colors.backgroundLight,
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
     marginHorizontal: 8,
   },
 });
 
-export default ChatScreen;
+export default DoctorChatScreen;
 

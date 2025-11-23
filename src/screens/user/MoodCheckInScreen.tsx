@@ -1,12 +1,20 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, ScrollView } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
-import { MoodSelector } from '../../components/MoodSelector';
 import { CustomButton } from '../../components/CustomButton';
 import { MoodType } from '../../types';
 import { db } from '../../config/firebase';
+
+const moods: { type: MoodType; label: string; image: any }[] = [
+  { type: 'sad', label: 'Sad', image: require('../../../assets/Sad.png') },
+  { type: 'nervous', label: 'Nervous', image: require('../../../assets/Nervous.png') },
+  { type: 'awkward', label: 'Awkward', image: require('../../../assets/Awkward.png') },
+  { type: 'shy', label: 'Shy', image: require('../../../assets/Shy.png') },
+  { type: 'happy', label: 'Happy', image: require('../../../assets/Happy.png') },
+  { type: 'wonderful', label: 'Wonderful', image: require('../../../assets/Wonderful.png') },
+];
 
 const MoodCheckInScreen = () => {
   const navigation = useNavigation();
@@ -34,12 +42,8 @@ const MoodCheckInScreen = () => {
 
       await db.collection('moodCheckIns').add(moodCheckIn);
 
-      Alert.alert('Thành công', 'Cảm xúc của bạn đã được ghi nhận!', [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack(),
-        },
-      ]);
+      // Navigate to mood result screen
+      navigation.navigate('MoodResult' as never, { mood: selectedMood });
     } catch (error) {
       console.error('Error saving mood:', error);
       Alert.alert('Lỗi', 'Không thể lưu cảm xúc. Vui lòng thử lại.');
@@ -55,41 +59,73 @@ const MoodCheckInScreen = () => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={Colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Check-in cảm xúc</Text>
+        <Text style={styles.headerTitle}>Mood Check-in</Text>
         <View style={{ width: 24 }} />
       </View>
 
-      <View style={styles.content}>
-        <Text style={styles.title}>Bạn cảm thấy thế nào hôm nay?</Text>
-        <Text style={styles.subtitle}>
-          Hãy chia sẻ cảm xúc của bạn để chúng tôi có thể hỗ trợ bạn tốt hơn
-        </Text>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Greeting */}
+        <View style={styles.greetingContainer}>
+          <View style={styles.greetingBadge}>
+            <Ionicons name="cloud-outline" size={16} color={Colors.primary} />
+            <Text style={styles.greetingText}>Good Evening</Text>
+          </View>
+        </View>
 
-        <View style={styles.moodContainer}>
-          <MoodSelector selectedMood={selectedMood} onSelectMood={setSelectedMood} />
+        {/* Main Prompt */}
+        <View style={styles.promptContainer}>
+          <Text style={styles.title}>How are you feeling today?</Text>
+          <Text style={styles.subtitle}>
+            Take a moment to reflect your emotions and assess your mood today
+          </Text>
+        </View>
+
+        {/* Mood Grid */}
+        <View style={styles.moodGrid}>
+          {moods.map((mood) => (
+            <TouchableOpacity
+              key={mood.type}
+              style={[
+                styles.moodCard,
+                selectedMood === mood.type && styles.selectedMoodCard,
+              ]}
+              onPress={() => setSelectedMood(mood.type)}
+              activeOpacity={0.7}
+            >
+              <Image 
+                source={mood.image} 
+                style={styles.moodImage}
+                resizeMode="contain"
+              />
+              <Text style={styles.moodLabel}>{mood.label}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
         {selectedMood && (
           <View style={styles.selectedMoodInfo}>
             <Ionicons name="checkmark-circle" size={24} color={Colors.success} />
             <Text style={styles.selectedMoodText}>
-              Bạn đã chọn: {selectedMood.charAt(0).toUpperCase() + selectedMood.slice(1)}
+              You selected: {moods.find(m => m.type === selectedMood)?.label}
             </Text>
           </View>
         )}
 
         <View style={styles.tipsContainer}>
-          <Text style={styles.tipsTitle}>💡 Mẹo nhỏ:</Text>
+          <Text style={styles.tipsTitle}>💡 Tip:</Text>
           <Text style={styles.tipsText}>
-            Check-in cảm xúc hàng ngày giúp bạn theo dõi sức khỏe tinh thần và nhận được
-            hỗ trợ kịp thời từ các chuyên gia.
+            Daily mood check-ins help you track your mental health and receive timely support from professionals.
           </Text>
         </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.footer}>
         <CustomButton
-          title="Lưu cảm xúc"
+          title="Save Mood"
           onPress={handleSaveMood}
           disabled={!selectedMood}
           loading={loading}
@@ -118,26 +154,79 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.text,
   },
-  content: {
+  scrollView: {
     flex: 1,
+  },
+  scrollContent: {
     padding: 24,
+    paddingBottom: 20,
+  },
+  greetingContainer: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  greetingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  greetingText: {
+    fontSize: 14,
+    color: Colors.text,
+    marginLeft: 6,
+    fontWeight: '500',
+  },
+  promptContainer: {
+    alignItems: 'center',
+    marginBottom: 32,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: Colors.text,
-    marginBottom: 8,
+    marginBottom: 12,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     color: Colors.textSecondary,
     textAlign: 'center',
-    marginBottom: 32,
     lineHeight: 24,
+    paddingHorizontal: 20,
   },
-  moodContainer: {
-    marginVertical: 20,
+  moodGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  moodCard: {
+    width: '48%',
+    alignItems: 'center',
+    marginBottom: 20,
+    padding: 16,
+    borderRadius: 16,
+    backgroundColor: Colors.backgroundLight,
+  },
+  selectedMoodCard: {
+    backgroundColor: Colors.primaryLight,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+  },
+  moodImage: {
+    width: 100,
+    height: 100,
+    marginBottom: 12,
+  },
+  moodLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
   },
   selectedMoodInfo: {
     flexDirection: 'row',
@@ -146,7 +235,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.successLight,
     padding: 16,
     borderRadius: 12,
-    marginTop: 20,
+    marginBottom: 24,
   },
   selectedMoodText: {
     fontSize: 16,
@@ -158,7 +247,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryLight,
     padding: 16,
     borderRadius: 12,
-    marginTop: 32,
   },
   tipsTitle: {
     fontSize: 16,
@@ -176,6 +264,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
+    backgroundColor: Colors.background,
   },
 });
 

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Colors } from '../constants/colors';
 import { CustomButton } from '../components/CustomButton';
@@ -15,7 +15,7 @@ const OnboardingScreen = () => {
   const pages = [
     {
       title: 'Welcome to BKMindCare',
-      description: 'Stress is part of the Bach\'s health journey — but you don\'t have to face it alone. Our mental health experts are ready to help you find your balance.',
+      description: 'Stress is part of the Bach Khoa University\'s health journey — but you don\'t have to face it alone. Our mental health experts are ready to help you find your balance.',
       illustration: '🧘',
     },
     {
@@ -23,27 +23,28 @@ const OnboardingScreen = () => {
       features: [
         {
           title: '1-on-1 Counseling with Experts',
-          description: 'Schedule sessions with professionals, 24/7 availability',
-          color: Colors.purple,
-          icon: 'people',
+          description: 'Schedule private sessions with experienced counselors who understand student life.',
+          availability: '24/7',
+          color: Colors.blue,
+          image: require('../../assets/meetup.png'),
         },
         {
           title: 'Mental Health Assessment Tests',
-          description: 'Tests to understand mental health and track progress',
-          color: Colors.green,
-          icon: 'analytics',
+          description: 'Check in with yourself through professional questionnaires designed for student mental health.',
+          color: Colors.purple,
+          image: require('../../assets/smile.png'),
         },
         {
-          title: 'Self Care Resources',
-          description: 'Resources for daily well-being',
+          title: 'Self-Care Resources',
+          description: 'Explore helpful videos and exercises to improve your mental health.',
           color: Colors.green,
-          icon: 'leaf',
+          image: require('../../assets/medita.png'),
         },
       ],
       steps: [
-        { number: 1, title: 'Sign Up', description: 'Create your free account to connect with a mental health expert.', color: Colors.orange, icon: 'person-add' },
-        { number: 2, title: 'Book Session', description: 'Choose your suitable professional, time that suits, and schedule your session.', color: Colors.yellow, icon: 'calendar' },
-        { number: 3, title: 'Get Support', description: 'Receive professional support through text, video, or in-person sessions.', color: Colors.success, icon: 'chatbubbles' },
+        { number: 1, title: 'Sign Up', description: 'Create your free account in minutes with secure student verification.', color: Colors.yellow, icon: 'person-add' },
+        { number: 2, title: 'Book Session', description: 'Choose your counselor, pick a time that works, and schedule your session.', color: Colors.orange, icon: 'calendar' },
+        { number: 3, title: 'Get Support', description: 'Connect with your therapist through video, voice or chat in a safe space.', color: Colors.success, icon: 'chatbubbles' },
       ],
     },
   ];
@@ -67,7 +68,11 @@ const OnboardingScreen = () => {
       return (
         <View key={index} style={styles.page}>
           <View style={styles.illustrationContainer}>
-            <Text style={styles.illustrationEmoji}>🧘</Text>
+            <Image 
+              source={require('../../assets/welcome1.png')} 
+              style={styles.illustrationImage}
+              resizeMode="contain"
+            />
           </View>
           <Text style={styles.title}>{page.title}</Text>
           <Text style={styles.description}>{page.description}</Text>
@@ -84,8 +89,24 @@ const OnboardingScreen = () => {
                 <View style={styles.featureContent}>
                   <Text style={styles.featureTitle}>{feature.title}</Text>
                   <Text style={styles.featureDescription}>{feature.description}</Text>
+                  {feature.availability && (
+                    <View style={styles.availabilityContainer}>
+                      <View style={[styles.availabilityDot, { backgroundColor: feature.color }]} />
+                      <Text style={[styles.availabilityText, { color: feature.color }]}>
+                        {feature.availability}
+                      </Text>
+                    </View>
+                  )}
                 </View>
-                <Ionicons name={feature.icon as any} size={32} color={feature.color} />
+                {feature.image ? (
+                  <Image 
+                    source={feature.image} 
+                    style={styles.featureImage}
+                    resizeMode="contain"
+                  />
+                ) : (
+                  <Ionicons name={feature.icon as any} size={32} color={feature.color} />
+                )}
               </View>
             ))}
           </View>
@@ -165,11 +186,17 @@ const styles = StyleSheet.create({
   },
   illustrationContainer: {
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 40,
     marginTop: 20,
+    width: '100%',
+    height: 300,
   },
-  illustrationEmoji: {
-    fontSize: 120,
+  illustrationImage: {
+    width: '100%',
+    height: '100%',
+    maxWidth: 350,
+    maxHeight: 300,
   },
   title: {
     fontSize: 28,
@@ -207,6 +234,25 @@ const styles = StyleSheet.create({
   featureDescription: {
     fontSize: 14,
     color: Colors.textSecondary,
+  },
+  featureImage: {
+    width: 60,
+    height: 60,
+  },
+  availabilityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  availabilityDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  availabilityText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   sectionTitle: {
     fontSize: 22,
