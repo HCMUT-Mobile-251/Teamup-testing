@@ -57,7 +57,7 @@ const AboutScreen = () => {
 
         {/* About Section */}
         <View style={styles.section}>
-          <Text style={styles.appName} testID="app-name">BKMindCare</Text>
+          <Text style={styles.sectionTitle} testID="about-title">About BKMindCare</Text>
           <Text style={styles.sectionText}>
             BKMindCare is a comprehensive mental health support platform designed specifically for students at Ho Chi Minh City University of Technology (HCMUT). Our mission is to provide accessible, professional, and confidential mental health services to help students navigate their academic and personal challenges.
           </Text>

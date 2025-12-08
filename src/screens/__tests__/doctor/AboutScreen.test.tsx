@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent, screen } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import AboutScreen from '../../doctor/AboutScreen';
 import { Colors } from '../../../constants/colors';
@@ -39,56 +39,57 @@ describe('AboutScreen', () => {
   };
 
   it('renders without crashing', () => {
-    const { getByText } = renderScreen();
-    expect(getByText('About')).toBeTruthy();
+    renderScreen();
+    expect(screen.getByText('About')).toBeTruthy();
   });
 
   it('displays the correct header title', () => {
-    const { getByText } = renderScreen();
-    expect(getByText('About')).toBeTruthy();
+    renderScreen();
+    expect(screen.getByText('About')).toBeTruthy();
   });
 
   it('renders the back button', () => {
-    const { getByTestId } = renderScreen();
-    // You might need to add a testID to the back button in your component
-    // For now, we'll check by accessibility label or text
-    const backButton = getByTestId('back-button'); // Add testID="back-button" to your TouchableOpacity
+    renderScreen();
+    const backButton = screen.getByTestId('back-button');
     expect(backButton).toBeTruthy();
   });
 
   it('renders the app logo and name', () => {
-    const { getByText } = renderScreen();
-    expect(getByText('BKMindCare')).toBeTruthy();
-    expect(getByText('Version 1.0.0')).toBeTruthy();
+    renderScreen();
+    // Use getAllByText since there are multiple "BKMindCare" texts
+    const appNameElements = screen.getAllByText('BKMindCare');
+    expect(appNameElements.length).toBeGreaterThan(0);
+    expect(screen.getByText('Version 1.0.0')).toBeTruthy();
   });
 
   it('displays the about section content', () => {
-    const { getByText } = renderScreen();
-    expect(getByText('About BKMindCare')).toBeTruthy();
-    expect(getByText(/BKMindCare is a comprehensive mental health support platform/)).toBeTruthy();
+    renderScreen();
+    // Use getByTestId since we added testID="about-title"
+    expect(screen.getByTestId('about-title')).toBeTruthy();
+    expect(screen.getByText(/BKMindCare is a comprehensive mental health support platform/)).toBeTruthy();
   });
 
   it('lists all platform features', () => {
-    const { getByText } = renderScreen();
-    expect(getByText('Platform Features')).toBeTruthy();
-    expect(getByText('Patient Management & Statistics')).toBeTruthy();
-    expect(getByText('Appointment Scheduling & Management')).toBeTruthy();
-    expect(getByText('Anonymous Chat Support')).toBeTruthy();
-    expect(getByText('Patient Emotional Trends Analysis')).toBeTruthy();
-    expect(getByText('Review & Rating System')).toBeTruthy();
+    renderScreen();
+    expect(screen.getByText('Platform Features')).toBeTruthy();
+    expect(screen.getByText('Patient Management & Statistics')).toBeTruthy();
+    expect(screen.getByText('Appointment Scheduling & Management')).toBeTruthy();
+    expect(screen.getByText('Anonymous Chat Support')).toBeTruthy();
+    expect(screen.getByText('Patient Emotional Trends Analysis')).toBeTruthy();
+    expect(screen.getByText('Review & Rating System')).toBeTruthy();
   });
 
   it('displays contact information', () => {
-    const { getByText } = renderScreen();
-    expect(getByText('Contact Us')).toBeTruthy();
-    expect(getByText('support@bkmindcare.edu.vn')).toBeTruthy();
-    expect(getByText('+84 123 456 789')).toBeTruthy();
-    expect(getByText('HCMUT Campus, Ho Chi Minh City')).toBeTruthy();
+    renderScreen();
+    expect(screen.getByText('Contact Us')).toBeTruthy();
+    expect(screen.getByText('support@bkmindcare.edu.vn')).toBeTruthy();
+    expect(screen.getByText('+84 123 456 789')).toBeTruthy();
+    expect(screen.getByText('HCMUT Campus, Ho Chi Minh City')).toBeTruthy();
   });
 
   it('shows copyright information', () => {
-    const { getByText } = renderScreen();
-    expect(getByText('© 2024 BKMindCare. All rights reserved.')).toBeTruthy();
+    renderScreen();
+    expect(screen.getByText('© 2024 BKMindCare. All rights reserved.')).toBeTruthy();
   });
 
   it('navigates back when back button is pressed', () => {
@@ -96,12 +97,10 @@ describe('AboutScreen', () => {
     jest.spyOn(require('@react-navigation/native'), 'useNavigation')
       .mockReturnValue({ goBack: mockGoBack });
 
-    const { getByTestId } = renderScreen();
-    const backButton = getByTestId('back-button'); // Add testID="back-button" to your component
+    renderScreen();
+    const backButton = screen.getByTestId('back-button');
     
     fireEvent.press(backButton);
     expect(mockGoBack).toHaveBeenCalled();
   });
-
-
 });
