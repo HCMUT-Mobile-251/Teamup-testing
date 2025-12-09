@@ -1041,7 +1041,7 @@ on:
 jobs:
   test-and-analyze:
     name: Test and Analyze
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     
     steps:
       # Bước 1: Checkout code
